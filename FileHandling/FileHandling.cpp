@@ -39,8 +39,8 @@ int main()
         ErrorHandle(nRes);
         return 0;
     }
-    */
-
+    */    
+    
     BUSEO_CODE code;
     memset(&code, 0, sizeof(BUSEO_CODE));
     nRes = ReadFromFile(&code, RW_BUSEO, OnFileHandleEvent);
@@ -63,8 +63,9 @@ int main()
         return 0;
     }
     */
-   
-
+    
+    PrintRecord(&emp);
+    
 
 
 

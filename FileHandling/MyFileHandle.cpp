@@ -143,7 +143,7 @@ short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsig
 
     unsigned int readDataCode;
     switch (nCode)
-    {
+{
     case RW_EMPLOY: readDataCode = FILE_ACR_EMPLOY; break;
     case RW_BUSEO:  readDataCode = FILE_ACR_BUSEO; break;
     case RW_JIKGUP: readDataCode = FILE_ACR_JIKGUP;
@@ -160,8 +160,8 @@ short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsig
     unsigned short readedCount = 0;
     do {
         size_t nRet = fread_s(pData, dataSize, dataSize, 1, fp);
-        if (!nRet)
-            return CANNOT_READ;
+    if (!nRet)
+        return CANNOT_READ;
 
         ptrFileHandler(pData, readDataCode);
         readedCount++;

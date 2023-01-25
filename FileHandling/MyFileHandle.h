@@ -4,7 +4,7 @@ typedef struct {
     short num;      // 사번
     char name[30];  // 이름
     short buseo;    // 부서
-    short jikgup;   // 직급    
+    short jikgup;   // 직급
 } EMPLOY;
 
 typedef struct {
