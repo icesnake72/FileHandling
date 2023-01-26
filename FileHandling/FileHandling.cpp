@@ -5,8 +5,10 @@
 #include <vcruntime_string.h>
 
 #include "MyFileHandle.h"
+#include <malloc.h>
 
-
+//static int readCount = 0;
+//static EMPLOY empArr[MAX_RECORDS] = {0};
 
 int main()
 {
@@ -14,7 +16,61 @@ int main()
     EMPLOY emp;
     memset(&emp, 0, sizeof(EMPLOY));
 
+    unsigned long lSize = 0;
+    nRes = GetFileSize(EMPLOY_FILE, &lSize);
+    if (nRes != SUCCESS_OPERATION)
+    {
+        ErrorHandle(nRes);
+        return 0;
+    }
+
+    EMPLOY* pem = (EMPLOY*)malloc(lSize);
+    if (pem)
+    {
+        memset(pem, 0, lSize);
+        nRes = ReadFromFile(pem, lSize, RW_EMPLOY, OnFileHandleEvent);
+        if (nRes != SUCCESS_OPERATION)
+        {
+            ErrorHandle(nRes);
+            return 0;
+        }
+    }
+
+    for (unsigned long p = 0; p < (lSize/ sizeof(EMPLOY)); p++ )
+    {
+        PrintRecord(&pem[p]);
+    }
+    
+    free(pem);
+    pem = NULL;
+    
+
     // printf("sizeof(EMPLOY)= %zd\n", sizeof(EMPLOY));      
+
+    /*JIKGUP_CODE jikgup;
+    memset(&jikgup, 0, sizeof(JIKGUP_CODE));
+
+    nRes = ReadFromFile(&jikgup, RW_JIKGUP, OnFileHandleEvent);
+    if (nRes != SUCCESS_OPERATION)
+    {
+        ErrorHandle(nRes);
+        return 0;
+    }*/
+
+
+    
+
+
+    //nRes = InputJikGup(&jikgup);
+    //if (!nRes)
+    //    printf("직급 정보 입력 실패!\n");
+    //
+    //nRes = WriteToFile(&jikgup, RW_JIKGUP);
+    //if (nRes != SUCCESS_OPERATION )
+    //{
+    //    ErrorHandle(nRes);
+    //    return 0;
+    //}
     
     /*
     if (!InputRecord(&emp))
@@ -39,16 +95,16 @@ int main()
         ErrorHandle(nRes);
         return 0;
     }
-    */    
-    
-    BUSEO_CODE code;
+    */
+  
+ /*   BUSEO_CODE code;
     memset(&code, 0, sizeof(BUSEO_CODE));
     nRes = ReadFromFile(&code, RW_BUSEO, OnFileHandleEvent);
     if (nRes != SUCCESS_OPERATION)
     {
         ErrorHandle(nRes);
         return 0;
-    }
+    }*/
     /*    
     if (!InputBuseo(&code))
     {
@@ -64,27 +120,39 @@ int main()
     }
     */
     
-    PrintRecord(&emp);
-    
-
-
+    // PrintRecord(&emp);
 
     return 0;
 }
 
 
-void OnFileHandleEvent(void* p, unsigned int nCode)
+// void OnFileHandleEvent(void* p, unsigned int nCode)
+void OnFileHandleEvent(void* p, unsigned long size, unsigned int nCode)
 {
-    if ( nCode== FILE_ACR_EMPLOY)
-        PrintRecord((EMPLOY*)p);
-
-    else if (nCode == FILE_ACR_BUSEO)
+    switch (nCode)
     {
-        BUSEO_CODE *code;
-        code = (BUSEO_CODE*)p;
-        printf("부서코드 : %d\n", code->code);
-        printf("부서명  : %s\n", code->buseo_name);
-    }
+        case FILE_ACR_EMPLOY:
+            printf("Read Succeeded!\n");
+            break;
+
+        case FILE_ACR_BUSEO:
+        {
+            BUSEO_CODE* code = NULL;
+            code = (BUSEO_CODE*)p;
+            printf("부서코드 : %d\n", code->code);
+            printf("부서명  : %s\n", code->buseo_name);
+            break;
+        }        
+
+        case FILE_ACR_JIKGUP:
+        {
+            JIKGUP_CODE* code = NULL;
+            code = (JIKGUP_CODE*)p;
+            printf("직급코드 : %d\n", code->code);
+            printf("직급명 : %s\n", code->jikgup_name);
+            break;
+        }        
+    }    
 }
 
 // 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴

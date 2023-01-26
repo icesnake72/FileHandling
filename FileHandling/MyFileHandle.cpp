@@ -133,15 +133,15 @@ short WriteToFile(void* pData, int nCode)
 
 
 // short ReadFromFile(EMPLOY* emp, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount)
-short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount)
+short ReadFromFile(void* pData, unsigned long dataSize, int nCode, void (*ptrFileHandler)(void* p, unsigned long size, unsigned int nCode), unsigned short toReadCount)
 {
-    unsigned short dataSize = 0;
+    unsigned short buffSize = 0;
     char szFileName[FILE_NAME_LEN];
     memset(szFileName, 0, FILE_NAME_LEN);
-    if (SetFileNameAndDataSize(nCode, szFileName, FILE_NAME_LEN, &dataSize) == INVALID_CODE)
+    if (SetFileNameAndDataSize(nCode, szFileName, FILE_NAME_LEN, &buffSize) == INVALID_CODE)
         return INVALID_CODE;
 
-    unsigned int readDataCode;
+    unsigned int readDataCode = 0;
     switch (nCode)
 {
     case RW_EMPLOY: readDataCode = FILE_ACR_EMPLOY; break;
@@ -157,18 +157,47 @@ short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsig
         return CANNOT_OPEN_FILE;
     }
 
-    unsigned short readedCount = 0;
-    do {
-        size_t nRet = fread_s(pData, dataSize, dataSize, 1, fp);
-    if (!nRet)
-        return CANNOT_READ;
+    // char* p = (char *)pData;
+    size_t readedCount = dataSize/buffSize;
+    // do {
+        size_t nRet = fread_s(pData, dataSize, buffSize, readedCount, fp);
+        if (!nRet)
+        {
+            fclose(fp);
+            fp = NULL;
+            return CANNOT_READ;
+        }
 
-        ptrFileHandler(pData, readDataCode);
-        readedCount++;
+        if ( ptrFileHandler )
+            ptrFileHandler(pData, dataSize, readDataCode);
 
-    } while (!feof(fp) || readedCount < toReadCount);
+//         readedCount++;
+        // p += buffSize;
+
+    // } while (!feof(fp) && readedCount < toReadCount);
+    fclose(fp);
+    fp = NULL;
+
+    return SUCCESS_OPERATION;
+}
+
+short GetFileSize(const char* filename, unsigned long *size)
+{
+    FILE* fp = NULL;
+    fopen_s(&fp, filename, "rb");
+    if (fp == NULL)
+    {
+        return CANNOT_OPEN_FILE;
+    }
+
+    if (fseek(fp, 0, SEEK_END) != 0)
+    { 
+        fclose(fp);
+        fp = NULL;
+        return CANNOT_SEEK;
+    }
     
-
+    *size = ftell(fp);
     fclose(fp);
     fp = NULL;
 

@@ -21,6 +21,7 @@ typedef struct {
 #define CANNOT_WRITE        -1
 #define CANNOT_READ         -2
 #define INVALID_CODE        -3
+#define CANNOT_SEEK         -4
 #define SUCCESS_OPERATION   1
 
 #define FILE_ACR_EMPLOY  0
@@ -39,8 +40,11 @@ typedef struct {
 
 #define FILE_NAME_LEN   512
 
+#define MAX_RECORDS     10
+#define MAX_EMP_BUFFER  (sizeof(EMPLOY) * MAX_RECORDS)
 
-void OnFileHandleEvent(void* p, unsigned int nCode);
+
+void OnFileHandleEvent(void* p, unsigned long size, unsigned int nCode);
 
 void PrintTitle(void);
 
@@ -58,7 +62,10 @@ int SetFileNameAndDataSize(int nCode, char* szFileName, unsigned short fileNameL
 short WriteToFile(void* pData, int nCode);
 
 // short ReadFromFile(EMPLOY* emp, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount=10);
-short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount = 10);
+//short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount = 10);
+short ReadFromFile(void* pData, unsigned long dataSize, int nCode, void (*ptrFileHandler)(void* p, unsigned long size, unsigned int nCode)=NULL, unsigned short toReadCount=10);
+
+short GetFileSize(const char* filename, unsigned long* size);
 
 void ErrorHandle(short errCode);
 
