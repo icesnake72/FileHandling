@@ -20,31 +20,89 @@ void ErrorHandle(short errCode)
     }
 }
 
-void PrintTitle()
+void PrintTitle(short mode)
 {
-    printf("사번\t");
-    printf("이름\t\t");
-    printf("부서코드\t");
-    printf("직급코드\n");
-    for (int i = 0; i < 50; i++)
-        printf("=");
+    switch (mode)
+    {
+    case RW_EMPLOY:
+        printf("사번\t");
+        printf("이름\t\t");
+        printf("부서코드\t");
+        printf("직급코드\n");
+        for (int i = 0; i < 50; i++)
+            printf("=");
 
-    printf("\n");
+        printf("\n");
+        break;
+
+    case RW_BUSEO:
+        printf("부서코드\t");
+        printf("부서명\n");
+        for (int i = 0; i < 30; i++)
+            printf("=");
+        printf("\n");
+        break;
+
+    case RW_JIKGUP:
+        printf("직급코드\t");
+        printf("직급명\n");
+        for (int i = 0; i < 30; i++)
+            printf("=");
+        printf("\n");
+        break;
+    }
+    
+
+
 }
 
-void PrintRecord(EMPLOY* emp)
+void PrintEmployRecord(void *pData, long empSize, BUSEO_CODE* pbu, long buSize, JIKGUP_CODE* pji, long jiSize)
 {
-    /*
-    printf("사번 : %d\n", emp->num);
-    printf("이름 : %s\n", emp->name);
-    printf("부서코드 : %d\n", emp->buseo);
-    printf("직급코드 : %d\n", emp->jikgup);
-    */
+    if (pData == NULL || empSize == 0)
+        return;
+
+    char tmp[20] = { 0 };
+    EMPLOY* emp = (EMPLOY*)pData;
 
     printf("%d\t", emp->num);
     printf("%s\t\t", emp->name);
-    printf("%d\t\t", emp->buseo);
+    GetBuseoName(emp->buseo, pbu, buSize, tmp, 20) ? printf("%s\t\t", tmp) : printf("%d\t\t", emp->buseo);
     printf("%d\n", emp->jikgup);
+}
+
+// void PrintRecord(EMPLOY* emp)
+void PrintRecord(short mode, void* pData, long empSize, BUSEO_CODE *pbu, long buSize, JIKGUP_CODE *pji, long jiSize)
+{
+    /*EMPLOY* emp = NULL;
+    BUSEO_CODE* pbu = NULL;
+    JIKGUP_CODE* pji = NULL;*/
+    
+    switch (mode)
+    {
+    case RW_EMPLOY:
+        PrintEmployRecord(pData, empSize, pbu, buSize, pji, jiSize);
+        break;  
+        
+
+    case RW_BUSEO:
+        {
+            BUSEO_CODE* pbu = (BUSEO_CODE*)pData;
+            printf("%d\t", pbu->code);
+            printf("%s\n", pbu->buseo_name);
+            break;
+        }
+        
+
+    case RW_JIKGUP:
+        {
+            JIKGUP_CODE* pji = (JIKGUP_CODE*)pData;
+            printf("%d\t", pji->code);
+            printf("%s\n", pji->jikgup_name);
+            break;
+        }        
+    }
+
+    
 }
 
 short InputRecord(EMPLOY* emp)
@@ -133,15 +191,15 @@ short WriteToFile(void* pData, int nCode)
 
 
 // short ReadFromFile(EMPLOY* emp, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount)
-short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount)
+short ReadFromFile(void* pData, unsigned long dataSize, int nCode, void (*ptrFileHandler)(void* p, unsigned long size, unsigned int nCode), unsigned short toReadCount)
 {
-    unsigned short dataSize = 0;
+    unsigned short buffSize = 0;
     char szFileName[FILE_NAME_LEN];
     memset(szFileName, 0, FILE_NAME_LEN);
-    if (SetFileNameAndDataSize(nCode, szFileName, FILE_NAME_LEN, &dataSize) == INVALID_CODE)
+    if (SetFileNameAndDataSize(nCode, szFileName, FILE_NAME_LEN, &buffSize) == INVALID_CODE)
         return INVALID_CODE;
 
-    unsigned int readDataCode;
+    unsigned int readDataCode = 0;
     switch (nCode)
 {
     case RW_EMPLOY: readDataCode = FILE_ACR_EMPLOY; break;
@@ -157,18 +215,47 @@ short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsig
         return CANNOT_OPEN_FILE;
     }
 
-    unsigned short readedCount = 0;
-    do {
-        size_t nRet = fread_s(pData, dataSize, dataSize, 1, fp);
-    if (!nRet)
-        return CANNOT_READ;
+    // char* p = (char *)pData;
+    size_t readedCount = dataSize/buffSize;
+    // do {
+        size_t nRet = fread_s(pData, dataSize, buffSize, readedCount, fp);
+        if (!nRet)
+        {
+            fclose(fp);
+            fp = NULL;
+            return CANNOT_READ;
+        }
 
-        ptrFileHandler(pData, readDataCode);
-        readedCount++;
+        if ( ptrFileHandler )
+            ptrFileHandler(pData, dataSize, readDataCode);
 
-    } while (!feof(fp) || readedCount < toReadCount);
+//         readedCount++;
+        // p += buffSize;
+
+    // } while (!feof(fp) && readedCount < toReadCount);
+    fclose(fp);
+    fp = NULL;
+
+    return SUCCESS_OPERATION;
+}
+
+short GetFileSize(const char* filename, unsigned long *size)
+{
+    FILE* fp = NULL;
+    fopen_s(&fp, filename, "rb");
+    if (fp == NULL)
+    {
+        return CANNOT_OPEN_FILE;
+    }
+
+    if (fseek(fp, 0, SEEK_END) != 0)
+    { 
+        fclose(fp);
+        fp = NULL;
+        return CANNOT_SEEK;
+    }
     
-
+    *size = ftell(fp);
     fclose(fp);
     fp = NULL;
 
@@ -206,4 +293,23 @@ short InputJikGup(JIKGUP_CODE *code)
     if (!nRet) return 0;
 
     return 1;
+}
+
+
+short GetBuseoName(short nCode, void *pData, long lSize, char* name, long bufSize) {
+    if (name == NULL || lSize<=0 )
+        return 0;
+
+    BUSEO_CODE* pbu = (BUSEO_CODE *)pData;
+    int nCount = lSize / sizeof(BUSEO_CODE);
+    for (int i = 0; i < nCount; i++)
+    {
+        if (nCode == pbu[i].code)
+        {
+            strcpy_s(name, bufSize, pbu[i].buseo_name);
+            return 1;
+        }            
+    }
+
+    return 0;
 }
