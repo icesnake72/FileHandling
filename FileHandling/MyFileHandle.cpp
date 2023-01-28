@@ -1,28 +1,47 @@
-#include <stdio.h>
-#include <vcruntime_string.h>
-#include <string.h>
+
 
 #include "MyFileHandle.h"
 
 
 void ShowMenu()
 {
-    printf("1.  직원 정보 보기\n");
-    printf("2.  직원 정보 입력\n");
-    printf("3.  직원 정보 수정(미구현)\n");
-    printf("4.  직원 정보 삭제(미구현)\n");
+    system("cls");
+
+    printf("1. 직원 정보 보기\n");
+    printf("2. 직원 정보 입력\n");
+    printf("3. 직원 정보 수정(미구현)\n");
+    printf("4. 직원 정보 삭제(미구현)\n");
     printf("============================\n");
-    printf("5.  부서 정보 보기\n");
-    printf("6.  부서 정보 입력\n");
-    printf("7.  부서 정보 수정(미구현)\n");
-    printf("8.  부서 정보 삭제(미구현)\n");
+    printf("5. 부서 정보 보기\n");
+    printf("6. 부서 정보 입력\n");
+    printf("7. 부서 정보 수정(미구현)\n");
+    printf("8. 부서 정보 삭제(미구현)\n");
     printf("============================\n");
-    printf("9.  직급 정보 보기\n");
-    printf("10. 직급 정보 입력\n");
-    printf("11. 직급 정보 수정(미구현)\n");
-    printf("12. 직급 정보 삭제(미구현)\n");
+    printf("9  직급 정보 보기\n");
+    printf("a. 직급 정보 입력\n");
+    printf("b. 직급 정보 수정(미구현)\n");
+    printf("c. 직급 정보 삭제(미구현)\n");
+    printf("============================\n");
+    printf("x. 종료\n");    
+    printf("============================\n");
+    printf("원하시는 메뉴를 선택하세요");
 }
 
+
+void ShowSubMenu()
+{   
+    for(int i=0; i<50; i++) printf("=");
+    
+    printf("\n");
+    printf("p. 이전 메뉴로 돌아가기\n");
+        
+    int n = _getch();
+    while ( 1 )
+    {
+        if ('p' == n || 'P' == n)
+            return;        
+    }
+}
 
 
 void ErrorHandle(short errCode)

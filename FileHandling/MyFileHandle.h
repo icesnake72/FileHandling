@@ -1,5 +1,12 @@
 #pragma once
 
+#include <stdio.h>
+#include <vcruntime_string.h>
+#include <string.h>
+#include <conio.h>
+#include <windows.h>
+#include <malloc.h> 
+
 typedef struct {
     short num;      // 사번
     char name[30];  // 이름
@@ -76,3 +83,5 @@ short GetBuseoName(short nCode, void* pData, long lSize, char* name, long bufSiz
 short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSize);
 
 void ShowMenu();
+
+void ShowSubMenu();

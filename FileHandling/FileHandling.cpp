@@ -1,11 +1,10 @@
 ﻿// FileHandling.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
 //
 
-#include <stdio.h>
-#include <vcruntime_string.h>
+
 
 #include "MyFileHandle.h"
-#include <malloc.h>
+
 
 //static int readCount = 0;
 //static EMPLOY empArr[MAX_RECORDS] = {0};
@@ -23,6 +22,7 @@ int main()
     unsigned long buSize = 0;
     unsigned long jiSize = 0;
 
+    int n = 0;
 
 
     nRes = GetFileSize(EMPLOY_FILE, &lSize);
@@ -103,18 +103,34 @@ int main()
     //    PrintRecord(&pji[p], RW_JIKGUP);
     //}
 
+      
 
-    ShowMenu();
+    while (TRUE)
+    {
+        ShowMenu();
+
+        n = _getch();
+        // n -= '0';
+        system("cls");
+        switch (n)
+        {
+        case '1':
+            PrintTitle(RW_EMPLOY);
+            for (unsigned long p = 0; p < (lSize / sizeof(EMPLOY)); p++)
+                PrintEmployRecord(&pem[p], lSize, pbu, buSize, pji, jiSize);
+
+            ShowSubMenu();
+            break;
 
 
+        case 'x':
+        case 'X':
+            goto ReleaseMem;
 
-
-    //PrintTitle(RW_EMPLOY);
-    //for (unsigned long p = 0; p < (lSize / sizeof(EMPLOY)); p++)
-    //{
-    //    // PrintRecord(&pem[p], RW_EMPLOY);
-    //    PrintEmployRecord(&pem[p], lSize, pbu, buSize, pji, jiSize);
-    //}
+        default:
+            break;
+        }
+    }  
 
     
 
