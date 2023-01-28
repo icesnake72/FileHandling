@@ -67,7 +67,9 @@ void PrintEmployRecord(void *pData, long empSize, BUSEO_CODE* pbu, long buSize, 
     printf("%d\t", emp->num);
     printf("%s\t\t", emp->name);
     GetBuseoName(emp->buseo, pbu, buSize, tmp, 20) ? printf("%s\t\t", tmp) : printf("%d\t\t", emp->buseo);
-    printf("%d\n", emp->jikgup);
+    memset(tmp, 0, 20);
+    GetJikgupName(emp->jikgup, pji, jiSize, tmp, 20) ? printf("%s\n", tmp) : printf("%d\n", emp->jikgup);
+    // printf("%d\n", emp->jikgup);
 }
 
 // void PrintRecord(EMPLOY* emp)
@@ -316,6 +318,21 @@ short GetBuseoName(short nCode, void *pData, long lSize, char* name, long bufSiz
 
 short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSize)
 {
+    if (name == NULL || lSize <= 0)
+        return 0;
+
+    JIKGUP_CODE* pji = (JIKGUP_CODE*)pData;
+    int nCount = lSize / sizeof(JIKGUP_CODE);
+    for (int i = 0; i < nCount; i++)
+    {
+        if (nCode == pji[i].code)
+        {
+            strcpy_s(name, bufSize, pji[i].jikgup_name);
+            return 1;
+        }
+    }
+    
+
     return 0;
 }
 
