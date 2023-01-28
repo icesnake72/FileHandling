@@ -73,3 +73,5 @@ void ErrorHandle(short errCode);
 
 short GetBuseoName(short nCode, void* pData, long lSize, char* name, long bufSize);
 
+short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSize);
+

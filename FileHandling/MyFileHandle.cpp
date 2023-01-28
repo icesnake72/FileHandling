@@ -313,3 +313,9 @@ short GetBuseoName(short nCode, void *pData, long lSize, char* name, long bufSiz
 
     return 0;
 }
+
+short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSize)
+{
+    return 0;
+}
+
