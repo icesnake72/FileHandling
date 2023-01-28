@@ -104,12 +104,17 @@ int main()
     //}
 
 
-    PrintTitle(RW_EMPLOY);
-    for (unsigned long p = 0; p < (lSize / sizeof(EMPLOY)); p++)
-    {
-        // PrintRecord(&pem[p], RW_EMPLOY);
-        PrintEmployRecord(&pem[p], lSize, pbu, buSize, pji, jiSize);
-    }
+    ShowMenu();
+
+
+
+
+    //PrintTitle(RW_EMPLOY);
+    //for (unsigned long p = 0; p < (lSize / sizeof(EMPLOY)); p++)
+    //{
+    //    // PrintRecord(&pem[p], RW_EMPLOY);
+    //    PrintEmployRecord(&pem[p], lSize, pbu, buSize, pji, jiSize);
+    //}
 
     
 

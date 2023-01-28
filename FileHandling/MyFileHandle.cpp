@@ -5,6 +5,25 @@
 #include "MyFileHandle.h"
 
 
+void ShowMenu()
+{
+    printf("1.  직원 정보 보기\n");
+    printf("2.  직원 정보 입력\n");
+    printf("3.  직원 정보 수정(미구현)\n");
+    printf("4.  직원 정보 삭제(미구현)\n");
+    printf("============================\n");
+    printf("5.  부서 정보 보기\n");
+    printf("6.  부서 정보 입력\n");
+    printf("7.  부서 정보 수정(미구현)\n");
+    printf("8.  부서 정보 삭제(미구현)\n");
+    printf("============================\n");
+    printf("9.  직급 정보 보기\n");
+    printf("10. 직급 정보 입력\n");
+    printf("11. 직급 정보 수정(미구현)\n");
+    printf("12. 직급 정보 삭제(미구현)\n");
+}
+
+
 
 void ErrorHandle(short errCode)
 {

@@ -75,3 +75,4 @@ short GetBuseoName(short nCode, void* pData, long lSize, char* name, long bufSiz
 
 short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSize);
 
+void ShowMenu();
