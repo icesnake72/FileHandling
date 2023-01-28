@@ -136,33 +136,33 @@ ReleaseMem:
 
     
 
-    unsigned long lSize = 0;
-    nRes = GetFileSize(EMPLOY_FILE, &lSize);
-    if (nRes != SUCCESS_OPERATION)
-    {
-        ErrorHandle(nRes);
-        return 0;
-    }
+    //unsigned long lSize = 0;
+    //nRes = GetFileSize(EMPLOY_FILE, &lSize);
+    //if (nRes != SUCCESS_OPERATION)
+    //{
+    //    ErrorHandle(nRes);
+    //    return 0;
+    //}
 
-    EMPLOY* pem = (EMPLOY*)malloc(lSize);
-    if (pem)
-    {
-        memset(pem, 0, lSize);
-        nRes = ReadFromFile(pem, lSize, RW_EMPLOY, OnFileHandleEvent);
-        if (nRes != SUCCESS_OPERATION)
-        {
-            ErrorHandle(nRes);
-            return 0;
-        }
-    }
+    //EMPLOY* pem = (EMPLOY*)malloc(lSize);
+    //if (pem)
+    //{
+    //    memset(pem, 0, lSize);
+    //    nRes = ReadFromFile(pem, lSize, RW_EMPLOY, OnFileHandleEvent);
+    //    if (nRes != SUCCESS_OPERATION)
+    //    {
+    //        ErrorHandle(nRes);
+    //        return 0;
+    //    }
+    //}
 
-    for (unsigned long p = 0; p < (lSize/ sizeof(EMPLOY)); p++ )
-    {
-        PrintRecord(&pem[p]);
-    }
-    
-    free(pem);
-    pem = NULL;
+    //for (unsigned long p = 0; p < (lSize/ sizeof(EMPLOY)); p++ )
+    //{
+    //    PrintRecord(&pem[p]);
+    //}
+    //
+    //free(pem);
+    //pem = NULL;
     
 
     // printf("sizeof(EMPLOY)= %zd\n", sizeof(EMPLOY));      
