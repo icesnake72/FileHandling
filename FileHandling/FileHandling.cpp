@@ -47,8 +47,7 @@ int main()
     }
            
 
-    // 부서
-    
+    // 부서    
     nRes = GetFileSize(BUSEO_FILE, &buSize);
     if (nRes != SUCCESS_OPERATION)
     {
@@ -69,14 +68,8 @@ int main()
         goto ReleaseMem;
     }
 
-    //PrintTitle(RW_BUSEO);
-    //for (unsigned long p = 0; p < (lSize / sizeof(BUSEO_CODE)); p++)
-    //{
-    //    PrintRecord(&pbu[p], RW_BUSEO);
-    //}
 
     // 직급
-    
     nRes = GetFileSize(JIKGUP_FILE, &jiSize);
     if (nRes != SUCCESS_OPERATION)
     {
@@ -88,7 +81,6 @@ int main()
     if (pji == NULL)
         goto ReleaseMem;
 
-
     memset(pji, 0, jiSize);
     nRes = ReadFromFile(pji, jiSize, RW_JIKGUP, NULL);
     if (nRes != SUCCESS_OPERATION)
@@ -97,31 +89,31 @@ int main()
         goto ReleaseMem;
     }
 
-    //PrintTitle(RW_JIKGUP);
-    //for (unsigned long p = 0; p < (lSize / sizeof(JIKGUP_CODE)); p++)
-    //{
-    //    PrintRecord(&pji[p], RW_JIKGUP);
-    //}
-
-      
-
+    
+    
     while (TRUE)
     {
         ShowMenu();
 
-        n = _getch();
-        // n -= '0';
+        n = _getch();        
         system("cls");
+
         switch (n)
         {
-        case '1':
-            PrintTitle(RW_EMPLOY);
-            for (unsigned long p = 0; p < (lSize / sizeof(EMPLOY)); p++)
-                PrintEmployRecord(&pem[p], lSize, pbu, buSize, pji, jiSize);
-
-            ShowSubMenu();
+        case '1':            
+            PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);            
             break;
 
+        case '2':
+        {
+            EMPLOY emp;
+            memset(&emp, 0, sizeof(EMPLOY));
+            if (InputRecord(&emp))
+            {   AppendData((void **)&pem, &lSize, (void*)&emp, sizeof(EMPLOY));
+                PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);                
+            }
+            break;
+        }
 
         case 'x':
         case 'X':

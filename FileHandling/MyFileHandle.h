@@ -85,3 +85,5 @@ short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSi
 void ShowMenu();
 
 void ShowSubMenu();
+
+short AppendData(void** ppData, unsigned long *lSizeData, void* pAppend, unsigned long lAppendSize);

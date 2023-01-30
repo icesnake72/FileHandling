@@ -88,8 +88,7 @@ void PrintTitle(short mode)
             printf("=");
         printf("\n");
         break;
-    }
-    
+    } 
 
 
 }
@@ -110,17 +109,23 @@ void PrintEmployRecord(void *pData, long empSize, BUSEO_CODE* pbu, long buSize, 
     // printf("%d\n", emp->jikgup);
 }
 
-// void PrintRecord(EMPLOY* emp)
+
 void PrintRecord(short mode, void* pData, long empSize, BUSEO_CODE *pbu, long buSize, JIKGUP_CODE *pji, long jiSize)
 {
-    /*EMPLOY* emp = NULL;
-    BUSEO_CODE* pbu = NULL;
-    JIKGUP_CODE* pji = NULL;*/
-    
+    if (pData == NULL || empSize == 0)
+        return;
+
+    PrintTitle(RW_EMPLOY);
+
+    int nCount = 0;
+    EMPLOY* pemp = (EMPLOY*)pData;
+
     switch (mode)
     {
     case RW_EMPLOY:
-        PrintEmployRecord(pData, empSize, pbu, buSize, pji, jiSize);
+        nCount = empSize / sizeof(EMPLOY);        
+        for(int i=0; i<nCount; i++)
+            PrintEmployRecord(&pemp[i], empSize, pbu, buSize, pji, jiSize);
         break;  
         
 
@@ -141,8 +146,7 @@ void PrintRecord(short mode, void* pData, long empSize, BUSEO_CODE *pbu, long bu
             break;
         }        
     }
-
-    
+    ShowSubMenu();
 }
 
 short InputRecord(EMPLOY* emp)
@@ -373,4 +377,28 @@ short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSi
 
     return 0;
 }
+
+
+short AppendData(void **ppData, unsigned long *lSizeData, void *pAppend, unsigned long lAppendSize)
+{
+    if (ppData == NULL || *lSizeData==0 || pAppend==NULL || lAppendSize==0 )
+        return 0;
+
+    unsigned long lNewSize = *lSizeData + lAppendSize;
+    char* pNewData = (char *)malloc(lNewSize);
+    if (pNewData == NULL)
+        return 0;
+
+    memcpy(pNewData, *ppData, *lSizeData);
+    memcpy(pNewData + *lSizeData, pAppend, lAppendSize);
+
+    free(*ppData);
+    *ppData = NULL;
+
+    *ppData = pNewData;
+    *lSizeData = lNewSize;
+
+    return 1;
+}
+
 
