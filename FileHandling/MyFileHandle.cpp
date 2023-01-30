@@ -35,8 +35,8 @@ void ShowSubMenu()
     printf("\n");
     printf("p. 이전 메뉴로 돌아가기\n");
         
-    int n = _getch();
-    while ( 1 )
+    int n = 0;
+    while ( n = _getch() )
     {
         if ('p' == n || 'P' == n)
             return;        
@@ -109,13 +109,24 @@ void PrintEmployRecord(void *pData, long empSize, BUSEO_CODE* pbu, long buSize, 
     // printf("%d\n", emp->jikgup);
 }
 
+void PrintBuseoRecord(BUSEO_CODE* pbu, unsigned long buSize)
+{
+    if (pbu == NULL || buSize == 0)
+        return;
+
+    int nCount = buSize / sizeof(BUSEO_CODE);
+    for (int i = 0; i < nCount; i++)
+    {
+        printf("%d\t", pbu[i].code);
+        printf("%s\n", pbu[i].buseo_name);
+    }    
+}
+
 
 void PrintRecord(short mode, void* pData, long empSize, BUSEO_CODE *pbu, long buSize, JIKGUP_CODE *pji, long jiSize)
 {
-    if (pData == NULL || empSize == 0)
-        return;
-
-    PrintTitle(RW_EMPLOY);
+    system("cls");
+    PrintTitle(mode);
 
     int nCount = 0;
     EMPLOY* pemp = (EMPLOY*)pData;
@@ -123,19 +134,19 @@ void PrintRecord(short mode, void* pData, long empSize, BUSEO_CODE *pbu, long bu
     switch (mode)
     {
     case RW_EMPLOY:
+        if (pData == NULL || empSize == 0)
+            return;
+
         nCount = empSize / sizeof(EMPLOY);        
         for(int i=0; i<nCount; i++)
             PrintEmployRecord(&pemp[i], empSize, pbu, buSize, pji, jiSize);
         break;  
         
 
-    case RW_BUSEO:
-        {
-            BUSEO_CODE* pbu = (BUSEO_CODE*)pData;
-            printf("%d\t", pbu->code);
-            printf("%s\n", pbu->buseo_name);
-            break;
-        }
+    case RW_BUSEO:        
+        PrintBuseoRecord(pbu, (unsigned long)buSize);        
+        break;
+        
         
 
     case RW_JIKGUP:
@@ -173,27 +184,26 @@ short InputRecord(EMPLOY* emp)
     return 1;
 }
 
-int SetFileNameAndDataSize(int nCode, char* szFileName, unsigned short fileNameLen, unsigned short *dataSize)
+int SetFileNameAndDataSize(int nCode, char* szFileName, unsigned short fileNameLen, unsigned long *lSize)
 {
     switch (nCode)
     {
     case RW_EMPLOY:
         strcpy_s(szFileName, FILE_NAME_LEN, EMPLOY_FILE);
-        *dataSize = (unsigned short)sizeof(EMPLOY);
+        *lSize = sizeof(EMPLOY);
         break;
 
     case RW_BUSEO:
-        strcpy_s(szFileName, FILE_NAME_LEN, BUSEO_FILE);
-        *dataSize = (unsigned short)sizeof(BUSEO_CODE);
+        strcpy_s(szFileName, FILE_NAME_LEN, BUSEO_FILE);        
+        *lSize = sizeof(BUSEO_CODE);
         break;
 
     case RW_JIKGUP:
-        strcpy_s(szFileName, FILE_NAME_LEN, JIKGUP_FILE);
-        *dataSize = (unsigned short)sizeof(JIKGUP_CODE);
+        strcpy_s(szFileName, FILE_NAME_LEN, JIKGUP_FILE);        
+        *lSize = sizeof(JIKGUP_CODE);
         break;
 
-    default:
-        *dataSize = 0;
+    default:        
         return INVALID_CODE;
     }
 
@@ -202,16 +212,19 @@ int SetFileNameAndDataSize(int nCode, char* szFileName, unsigned short fileNameL
 
 
 // short WriteToFile(EMPLOY* emp)
-short WriteToFile(void* pData, int nCode)
+short WriteToFile(void* pData, unsigned long lDataSize, int nCode)
 {
-    unsigned short dataSize = 0;
+    if (pData == NULL || lDataSize == 0)
+        return INVALID_PARAM;
+
+    unsigned long bufSize = 0;
     char szFileName[FILE_NAME_LEN];
     memset(szFileName, 0, FILE_NAME_LEN);
-    if (SetFileNameAndDataSize(nCode, szFileName, FILE_NAME_LEN, &dataSize)== INVALID_CODE)
+    if (SetFileNameAndDataSize(nCode, szFileName, FILE_NAME_LEN, &bufSize)== INVALID_CODE)
         return INVALID_CODE;
     
     FILE* fp = NULL;
-    fopen_s(&fp, szFileName, "ab");
+    fopen_s(&fp, szFileName, "wb");
     if (fp == NULL)
     {        
         return CANNOT_OPEN_FILE;
@@ -221,9 +234,13 @@ short WriteToFile(void* pData, int nCode)
     // PrintRecord(emp);
 
     size_t nRet = 0;
-    nRet = fwrite(pData, dataSize, 1, fp);
+    nRet = fwrite(pData, lDataSize, 1, fp);
     if (!nRet)
+    {
+        fclose(fp);
+        fp = NULL;
         return CANNOT_WRITE;
+    }
 
     // (nRet) ? printf("파일쓰기 성공(%zd block(s))\n", nRet) : printf("파일쓰기 실패\n");
     fclose(fp);
@@ -237,7 +254,7 @@ short WriteToFile(void* pData, int nCode)
 // short ReadFromFile(EMPLOY* emp, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount)
 short ReadFromFile(void* pData, unsigned long dataSize, int nCode, void (*ptrFileHandler)(void* p, unsigned long size, unsigned int nCode), unsigned short toReadCount)
 {
-    unsigned short buffSize = 0;
+    unsigned long buffSize = 0;
     char szFileName[FILE_NAME_LEN];
     memset(szFileName, 0, FILE_NAME_LEN);
     if (SetFileNameAndDataSize(nCode, szFileName, FILE_NAME_LEN, &buffSize) == INVALID_CODE)
@@ -352,7 +369,7 @@ short GetBuseoName(short nCode, void *pData, long lSize, char* name, long bufSiz
         {
             strcpy_s(name, bufSize, pbu[i].buseo_name);
             return 1;
-        }            
+        }
     }
 
     return 0;
@@ -399,6 +416,21 @@ short AppendData(void **ppData, unsigned long *lSizeData, void *pAppend, unsigne
     *lSizeData = lNewSize;
 
     return 1;
+}
+
+
+short ExistFile(const char* filename)
+{
+    int ret = 0;
+    FILE* fp = NULL;
+    fopen_s(&fp, filename, "r");
+    if (fp == NULL)
+        return 0;
+
+    
+    fclose(fp);
+    fp = NULL;
+    return 1;    
 }
 
 

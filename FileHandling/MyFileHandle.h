@@ -7,6 +7,7 @@
 #include <windows.h>
 #include <malloc.h> 
 
+
 typedef struct {
     short num;      // 사번
     char name[30];  // 이름
@@ -29,6 +30,7 @@ typedef struct {
 #define CANNOT_READ         -2
 #define INVALID_CODE        -3
 #define CANNOT_SEEK         -4
+#define INVALID_PARAM       -5
 #define SUCCESS_OPERATION   1
 
 #define FILE_ACR_EMPLOY  0
@@ -59,16 +61,18 @@ void PrintRecord(short mode, void* pData, long empSize, BUSEO_CODE* pbu=NULL, lo
 
 void PrintEmployRecord(void* pData, long empSize, BUSEO_CODE* pbu, long buSize, JIKGUP_CODE* pji, long jiSize);
 
+void PrintBuseoRecord(BUSEO_CODE* pbu, unsigned long buSize);
+
 short InputRecord(EMPLOY* emp);
 
 short InputBuseo(BUSEO_CODE* code);
 
 short InputJikGup(JIKGUP_CODE* code);
 
-int SetFileNameAndDataSize(int nCode, char* szFileName, unsigned short fileNameLen, unsigned short *dataSize);
+int SetFileNameAndDataSize(int nCode, char* szFileName, unsigned short fileNameLen, unsigned long* lSize);
 
 // short WriteToFile(EMPLOY* emp);
-short WriteToFile(void* pData, int nCode);
+short WriteToFile(void* pData, unsigned long lDataSize, int nCode);
 
 // short ReadFromFile(EMPLOY* emp, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount=10);
 //short ReadFromFile(void* pData, int nCode, void (*ptrFileHandler)(void* p, unsigned int nCode), unsigned short toReadCount = 10);
@@ -87,3 +91,5 @@ void ShowMenu();
 void ShowSubMenu();
 
 short AppendData(void** ppData, unsigned long *lSizeData, void* pAppend, unsigned long lAppendSize);
+
+short ExistFile(const char* filename);

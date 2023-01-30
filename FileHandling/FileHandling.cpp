@@ -1,13 +1,7 @@
 ﻿// FileHandling.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
 //
-
-
-
 #include "MyFileHandle.h"
 
-
-//static int readCount = 0;
-//static EMPLOY empArr[MAX_RECORDS] = {0};
 
 int main()
 {
@@ -17,27 +11,32 @@ int main()
     BUSEO_CODE* pbu = NULL;
     JIKGUP_CODE* pji = NULL;
 
-
     unsigned long lSize = 0;
     unsigned long buSize = 0;
     unsigned long jiSize = 0;
 
     int n = 0;
 
+    if (!ExistFile(EMPLOY_FILE))
+    {
+        EMPLOY emp;
+        InputRecord(&emp);
+        WriteToFile(&emp, sizeof(EMPLOY), RW_EMPLOY);
+    }
 
+
+    // 직원 정보 메모리에 로딩
     nRes = GetFileSize(EMPLOY_FILE, &lSize);
     if (nRes != SUCCESS_OPERATION)
     {
         ErrorHandle(nRes);
         return 0;
     }
-
-    
+        
     pem = (EMPLOY*)malloc(lSize);
     if (pem == NULL)
         return 0;
-
-    
+        
     memset(pem, 0, lSize);
     nRes = ReadFromFile(pem, lSize, RW_EMPLOY, OnFileHandleEvent);
     if (nRes != SUCCESS_OPERATION)
@@ -47,7 +46,7 @@ int main()
     }
            
 
-    // 부서    
+    // 부서 정보 메모리에 로딩
     nRes = GetFileSize(BUSEO_FILE, &buSize);
     if (nRes != SUCCESS_OPERATION)
     {
@@ -69,7 +68,7 @@ int main()
     }
 
 
-    // 직급
+    // 직급정보 메모리에 로딩
     nRes = GetFileSize(JIKGUP_FILE, &jiSize);
     if (nRes != SUCCESS_OPERATION)
     {
@@ -89,31 +88,49 @@ int main()
         goto ReleaseMem;
     }
 
-    
-    
+    //
+    // 메뉴 핸들링
     while (TRUE)
     {
         ShowMenu();
 
-        n = _getch();        
+        n = _getch();
         system("cls");
 
         switch (n)
         {
-        case '1':            
-            PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);            
+        case '1': // 직원 정보 출력
+            PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);
             break;
 
-        case '2':
+        case '2':   // 직원 정보 입력
         {
             EMPLOY emp;
             memset(&emp, 0, sizeof(EMPLOY));
             if (InputRecord(&emp))
-            {   AppendData((void **)&pem, &lSize, (void*)&emp, sizeof(EMPLOY));
-                PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);                
+            {   
+                if (!AppendData((void**)&pem, &lSize, (void*)&emp, sizeof(EMPLOY)))
+                {
+                    printf("데이터 추가 실패!");
+                    _getch();
+                    break;
+                }
+
+                if ( !WriteToFile(pem, lSize, RW_EMPLOY) )
+                {
+                    printf("데이터 추가 실패!");
+                    _getch();
+                    break;
+                }
+
+                PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);
             }
             break;
         }
+
+        case '5':
+            PrintRecord(RW_BUSEO, pem, lSize, pbu, buSize, pji, jiSize);
+            break;
 
         case 'x':
         case 'X':
@@ -122,9 +139,8 @@ int main()
         default:
             break;
         }
-    }  
+    }    
 
-    
 
 ReleaseMem:
     
@@ -265,36 +281,7 @@ void OnFileHandleEvent(void* p, unsigned long size, unsigned int nCode)
     switch (nCode)
     {
         case FILE_ACR_EMPLOY:
-            // printf("Read Succeeded!\n");
-            break;
-
         case FILE_ACR_BUSEO:
-        {
-            /*BUSEO_CODE* code = NULL;
-            code = (BUSEO_CODE*)p;
-            printf("부서코드 : %d\n", code->code);
-            printf("부서명  : %s\n", code->buseo_name);
-            break;*/
-        }        
-
-        case FILE_ACR_JIKGUP:
-        {
-            /*JIKGUP_CODE* code = NULL;
-            code = (JIKGUP_CODE*)p;
-            printf("직급코드 : %d\n", code->code);
-            printf("직급명 : %s\n", code->jikgup_name);
-            break;*/
-        }        
-    }    
+        case FILE_ACR_JIKGUP:    break;
+    }
 }
-
-// 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴
-// 프로그램 디버그: <F5> 키 또는 [디버그] > [디버깅 시작] 메뉴
-
-// 시작을 위한 팁: 
-//   1. [솔루션 탐색기] 창을 사용하여 파일을 추가/관리합니다.
-//   2. [팀 탐색기] 창을 사용하여 소스 제어에 연결합니다.
-//   3. [출력] 창을 사용하여 빌드 출력 및 기타 메시지를 확인합니다.
-//   4. [오류 목록] 창을 사용하여 오류를 봅니다.
-//   5. [프로젝트] > [새 항목 추가]로 이동하여 새 코드 파일을 만들거나, [프로젝트] > [기존 항목 추가]로 이동하여 기존 코드 파일을 프로젝트에 추가합니다.
-//   6. 나중에 이 프로젝트를 다시 열려면 [파일] > [열기] > [프로젝트]로 이동하고 .sln 파일을 선택합니다.
