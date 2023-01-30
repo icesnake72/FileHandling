@@ -55,20 +55,6 @@ typedef struct {
 
 void OnFileHandleEvent(void* p, unsigned long size, unsigned int nCode);
 
-void PrintTitle(short mode);
-
-void PrintRecord(short mode, void* pData, long empSize, BUSEO_CODE* pbu=NULL, long buSize=0, JIKGUP_CODE* pji=NULL, long jiSize=0);
-
-void PrintEmployRecord(void* pData, long empSize, BUSEO_CODE* pbu, long buSize, JIKGUP_CODE* pji, long jiSize);
-
-void PrintBuseoRecord(BUSEO_CODE* pbu, unsigned long buSize);
-
-short InputRecord(EMPLOY* emp);
-
-short InputBuseo(BUSEO_CODE* code);
-
-short InputJikGup(JIKGUP_CODE* code);
-
 int SetFileNameAndDataSize(int nCode, char* szFileName, unsigned short fileNameLen, unsigned long* lSize);
 
 // short WriteToFile(EMPLOY* emp);
@@ -82,13 +68,6 @@ short GetFileSize(const char* filename, unsigned long* size);
 
 void ErrorHandle(short errCode);
 
-short GetBuseoName(short nCode, void* pData, long lSize, char* name, long bufSize);
-
-short GetJikgupName(short nCode, void* pData, long lSize, char* name, long bufSize);
-
-void ShowMenu();
-
-void ShowSubMenu();
 
 short AppendData(void** ppData, unsigned long *lSizeData, void* pAppend, unsigned long lAppendSize);
 

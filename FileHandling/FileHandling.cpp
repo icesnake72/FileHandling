@@ -1,6 +1,18 @@
 ﻿// FileHandling.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
 //
+//
+// 2023년 1월 30일, Coded by E.B Kim
+//
+// 간략 RDB 구현
+// 동적 메모리 할당
+// 구조체와 포인터
+// 이중 포인터 사용
+//
+// 라이선스 없음(무제한 라이선스)
+
+
 #include "MyFileHandle.h"
+#include "showinfo.h"
 
 
 int main()
@@ -107,7 +119,7 @@ int main()
         {
             EMPLOY emp;
             memset(&emp, 0, sizeof(EMPLOY));
-            if (InputRecord(&emp))
+            if (InputRecord(&emp, pem, lSize))
             {   
                 if (!AppendData((void**)&pem, &lSize, (void*)&emp, sizeof(EMPLOY)))
                 {
@@ -118,7 +130,7 @@ int main()
 
                 if ( !WriteToFile(pem, lSize, RW_EMPLOY) )
                 {
-                    printf("데이터 추가 실패!");
+                    printf("데이터 저장 실패!");
                     _getch();
                     break;
                 }
@@ -130,6 +142,59 @@ int main()
 
         case '5':
             PrintRecord(RW_BUSEO, pem, lSize, pbu, buSize, pji, jiSize);
+            break;
+
+        case '6':
+        {
+            BUSEO_CODE buseo;
+            if ( InputBuseo(&buseo) )
+            {
+                if (!AppendData((void**)&pbu, &buSize, (void*)&buseo, sizeof(BUSEO_CODE)))
+                {
+                    printf("부서 추가 실패!");
+                    _getch();
+                    break;
+                }
+
+                if (!WriteToFile(pbu, buSize, RW_BUSEO))
+                {
+                    printf("부서 저장 실패!");
+                    _getch();
+                    break;
+                }
+
+                PrintRecord(RW_BUSEO, pem, lSize, pbu, buSize, pji, jiSize);
+            }
+            
+            break;
+        }
+        
+        case '9':
+            PrintRecord(RW_JIKGUP, pem, lSize, pbu, buSize, pji, jiSize);
+            break;
+
+        case '0':
+        {
+            JIKGUP_CODE jikgup;
+            if (InputJikGup(&jikgup))
+            {
+                if (!AppendData((void**)&pji, &jiSize, (void*)&jikgup, sizeof(JIKGUP_CODE)))
+                {
+                    printf("직급 추가 실패!");
+                    _getch();
+                    break;
+                }
+
+                if (!WriteToFile(pji, jiSize, RW_JIKGUP))
+                {
+                    printf("직급 저장 실패!");
+                    _getch();
+                    break;
+                }
+
+                PrintRecord(RW_JIKGUP, pem, lSize, pbu, buSize, pji, jiSize);
+            }
+        }
             break;
 
         case 'x':
