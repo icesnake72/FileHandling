@@ -127,12 +127,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FileHandling.cpp" />
-    <ClCompile Include="MyFileHandle.cpp" />
+    <ClCompile Include="insa.cpp" />
+    <ClCompile Include="FileHandle.cpp" />
     <ClCompile Include="showinfo.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MyFileHandle.h" />
+    <ClInclude Include="FileHandle.h" />
     <ClInclude Include="showinfo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -11,7 +11,7 @@
 // 라이선스 없음(무제한 라이선스)
 
 
-#include "MyFileHandle.h"
+
 #include "showinfo.h"
 
 
@@ -19,39 +19,59 @@ int main()
 {
     short nRes = 0;
 
-    EMPLOY* pem = NULL;
+    EMPLOYEE* pem = NULL;
     BUSEO_CODE* pbu = NULL;
     JIKGUP_CODE* pji = NULL;
 
-    unsigned long lSize = 0;
-    unsigned long buSize = 0;
-    unsigned long jiSize = 0;
+    size_t lSize = 0;
+    size_t buSize = 0;
+    size_t jiSize = 0;
 
     int n = 0;
+    s_res res = SUCCESS_RES;
 
-    if (!ExistFile(EMPLOY_FILE))
+    //
+    // 처음 실행한 경우 employee.dat 파일이 없는경우 레코드 한개를 입력받고
+    // 파일에 저장한 뒤 다음으로 진행한다.
+    if (ExistFile(EMPLOYEE_FILE)==FILE_NOT_FOUND)
     {
-        EMPLOY emp;
-        InputRecord(&emp);
-        WriteToFile(&emp, sizeof(EMPLOY), RW_EMPLOY);
+        EMPLOYEE emp;
+        res = InputRecord(&emp);
+        if (res != SUCCESS_RES)
+        {
+            ErrorHandle(res);
+            return 0;
+        }
+
+        res = WriteToFile(&emp, sizeof(EMPLOYEE), RW_EMPLOYEE);
+        if (res != SUCCESS_RES)
+        {
+            ErrorHandle(res);
+            return 0;
+        }
     }
 
 
-    // 직원 정보 메모리에 로딩
-    nRes = GetFileSize(EMPLOY_FILE, &lSize);
-    if (nRes != SUCCESS_OPERATION)
+    //
+    // 직원 정보 로딩
+    nRes = GetFileSize(EMPLOYEE_FILE, &lSize);
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         return 0;
     }
         
-    pem = (EMPLOY*)malloc(lSize);
+    pem = (EMPLOYEE*)malloc(lSize);
     if (pem == NULL)
+    {
+        ErrorHandle(MEM_ALLOC_FAIL);
         return 0;
+    }
+        
         
     memset(pem, 0, lSize);
-    nRes = ReadFromFile(pem, lSize, RW_EMPLOY, OnFileHandleEvent);
-    if (nRes != SUCCESS_OPERATION)
+    nRes = ReadFromFile(pem, lSize, RW_EMPLOYEE, OnFileHandleEvent);
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         goto ReleaseMem;
@@ -60,7 +80,7 @@ int main()
 
     // 부서 정보 메모리에 로딩
     nRes = GetFileSize(BUSEO_FILE, &buSize);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         goto ReleaseMem;
@@ -68,12 +88,16 @@ int main()
     
     pbu = (BUSEO_CODE*)malloc(buSize);
     if (pbu == NULL)
+    {
+        ErrorHandle(MEM_ALLOC_FAIL);
         goto ReleaseMem;
+    }
+        
     
     
     memset(pbu, 0, buSize);
     nRes = ReadFromFile(pbu, buSize, RW_BUSEO, NULL);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         goto ReleaseMem;
@@ -82,7 +106,7 @@ int main()
 
     // 직급정보 메모리에 로딩
     nRes = GetFileSize(JIKGUP_FILE, &jiSize);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         goto ReleaseMem;
@@ -90,11 +114,15 @@ int main()
 
     pji = (JIKGUP_CODE*)malloc(jiSize);
     if (pji == NULL)
+    {
+        ErrorHandle(MEM_ALLOC_FAIL);
         goto ReleaseMem;
+    }
+        
 
     memset(pji, 0, jiSize);
     nRes = ReadFromFile(pji, jiSize, RW_JIKGUP, NULL);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         goto ReleaseMem;
@@ -112,30 +140,32 @@ int main()
         switch (n)
         {
         case '1': // 직원 정보 출력
-            PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);
+            PrintRecord(RW_EMPLOYEE, pem, lSize, pbu, buSize, pji, jiSize);
             break;
 
         case '2':   // 직원 정보 입력
         {
-            EMPLOY emp;
-            memset(&emp, 0, sizeof(EMPLOY));
-            if (InputRecord(&emp, pem, lSize))
+            EMPLOYEE emp;
+            memset(&emp, 0, sizeof(EMPLOYEE));
+            if (InputRecord(&emp, pem, lSize)== SUCCESS_RES)
             {   
-                if (!AppendData((void**)&pem, &lSize, (void*)&emp, sizeof(EMPLOY)))
+                res = AppendData((void**)&pem, &lSize, (void*)&emp, sizeof(EMPLOYEE));
+                if (res!= SUCCESS_RES)
                 {
-                    printf("데이터 추가 실패!");
+                    ErrorHandle(res);
                     _getch();
                     break;
                 }
 
-                if ( !WriteToFile(pem, lSize, RW_EMPLOY) )
+                res = WriteToFile(pem, lSize, RW_EMPLOYEE);
+                if ( res!= SUCCESS_RES)
                 {
-                    printf("데이터 저장 실패!");
+                    ErrorHandle(res);
                     _getch();
                     break;
                 }
 
-                PrintRecord(RW_EMPLOY, pem, lSize, pbu, buSize, pji, jiSize);
+                PrintRecord(RW_EMPLOYEE, pem, lSize, pbu, buSize, pji, jiSize);
             }
             break;
         }
@@ -147,18 +177,20 @@ int main()
         case '6':
         {
             BUSEO_CODE buseo;
-            if ( InputBuseo(&buseo) )
+            if ( InputBuseo(&buseo, pbu, buSize) == SUCCESS_RES)
             {
-                if (!AppendData((void**)&pbu, &buSize, (void*)&buseo, sizeof(BUSEO_CODE)))
+                res = AppendData((void**)&pbu, &buSize, (void*)&buseo, sizeof(BUSEO_CODE));
+                if (res!=SUCCESS_RES)
                 {
-                    printf("부서 추가 실패!");
+                    ErrorHandle(res);
                     _getch();
                     break;
                 }
 
-                if (!WriteToFile(pbu, buSize, RW_BUSEO))
+                res = WriteToFile(pbu, buSize, RW_BUSEO);
+                if (res != SUCCESS_RES)
                 {
-                    printf("부서 저장 실패!");
+                    ErrorHandle(res);
                     _getch();
                     break;
                 }
@@ -176,18 +208,20 @@ int main()
         case '0':
         {
             JIKGUP_CODE jikgup;
-            if (InputJikGup(&jikgup))
+            if (InputJikGup(&jikgup, pji, jiSize)==SUCCESS_RES)
             {
-                if (!AppendData((void**)&pji, &jiSize, (void*)&jikgup, sizeof(JIKGUP_CODE)))
+                res = AppendData((void**)&pji, &jiSize, (void*)&jikgup, sizeof(JIKGUP_CODE));
+                if (res!=SUCCESS_RES )
                 {
-                    printf("직급 추가 실패!");
+                    ErrorHandle(res);
                     _getch();
                     break;
                 }
 
-                if (!WriteToFile(pji, jiSize, RW_JIKGUP))
+                res = WriteToFile(pji, jiSize, RW_JIKGUP);
+                if (res!=SUCCESS_RES)
                 {
-                    printf("직급 저장 실패!");
+                    ErrorHandle(res);
                     _getch();
                     break;
                 }
@@ -230,27 +264,27 @@ ReleaseMem:
 
     // 고치고 다시 푸시
 
-    //unsigned long lSize = 0;
-    //nRes = GetFileSize(EMPLOY_FILE, &lSize);
-    //if (nRes != SUCCESS_OPERATION)
+    //size_t lSize = 0;
+    //nRes = GetFileSize(EMPLOYEE_FILE, &lSize);
+    //if (nRes != SUCCESS_RES)
     //{
     //    ErrorHandle(nRes);
     //    return 0;
     //}
 
-    //EMPLOY* pem = (EMPLOY*)malloc(lSize);
+    //EMPLOYEE* pem = (EMPLOYEE*)malloc(lSize);
     //if (pem)
     //{
     //    memset(pem, 0, lSize);
-    //    nRes = ReadFromFile(pem, lSize, RW_EMPLOY, OnFileHandleEvent);
-    //    if (nRes != SUCCESS_OPERATION)
+    //    nRes = ReadFromFile(pem, lSize, RW_EMPLOYEE, OnFileHandleEvent);
+    //    if (nRes != SUCCESS_RES)
     //    {
     //        ErrorHandle(nRes);
     //        return 0;
     //    }
     //}
 
-    //for (unsigned long p = 0; p < (lSize/ sizeof(EMPLOY)); p++ )
+    //for (size_t p = 0; p < (lSize/ sizeof(EMPLOYEE)); p++ )
     //{
     //    PrintRecord(&pem[p]);
     //}
@@ -259,13 +293,13 @@ ReleaseMem:
     //pem = NULL;
     
 
-    // printf("sizeof(EMPLOY)= %zd\n", sizeof(EMPLOY));      
+    // printf("sizeof(EMPLOYEE)= %zd\n", sizeof(EMPLOYEE));      
 
     /*JIKGUP_CODE jikgup;
     memset(&jikgup, 0, sizeof(JIKGUP_CODE));
 
     nRes = ReadFromFile(&jikgup, RW_JIKGUP, OnFileHandleEvent);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         return 0;
@@ -280,7 +314,7 @@ ReleaseMem:
     //    printf("직급 정보 입력 실패!\n");
     //
     //nRes = WriteToFile(&jikgup, RW_JIKGUP);
-    //if (nRes != SUCCESS_OPERATION )
+    //if (nRes != SUCCESS_RES )
     //{
     //    ErrorHandle(nRes);
     //    return 0;
@@ -295,7 +329,7 @@ ReleaseMem:
     PrintRecord(&emp);
 
     nRes = WriteToFile(&emp);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         return 0;
@@ -304,7 +338,7 @@ ReleaseMem:
     
     PrintTitle();
     nRes = ReadFromFile(&emp, OnFileHandleEvent);
-    if ( nRes!= SUCCESS_OPERATION )
+    if ( nRes!= SUCCESS_RES )
     {
         ErrorHandle(nRes);
         return 0;
@@ -314,7 +348,7 @@ ReleaseMem:
  /*   BUSEO_CODE code;
     memset(&code, 0, sizeof(BUSEO_CODE));
     nRes = ReadFromFile(&code, RW_BUSEO, OnFileHandleEvent);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         return 0;
@@ -327,7 +361,7 @@ ReleaseMem:
     }
 
     nRes = WriteToFile(&code, RW_BUSEO);
-    if (nRes != SUCCESS_OPERATION)
+    if (nRes != SUCCESS_RES)
     {
         ErrorHandle(nRes);
         return 0;
@@ -341,11 +375,11 @@ ReleaseMem:
 
 
 // void OnFileHandleEvent(void* p, unsigned int nCode)
-void OnFileHandleEvent(void* p, unsigned long size, unsigned int nCode)
+void OnFileHandleEvent(void* p, size_t size, unsigned int nCode)
 {
     switch (nCode)
     {
-        case FILE_ACR_EMPLOY:
+        case FILE_ACR_EMPLOYEE:
         case FILE_ACR_BUSEO:
         case FILE_ACR_JIKGUP:    break;
     }
