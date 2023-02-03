@@ -200,6 +200,29 @@ int main()
             
             break;
         }
+
+        case '7':   // 부서정보 업데이트
+            res = UpdateBuseo(pbu, buSize);
+            if ( res != SUCCESS_RES)
+            {
+                ErrorHandle(res);
+                _getch();                
+                break;
+            }
+
+            res = WriteToFile(pbu, buSize, RW_BUSEO);
+            if (res != SUCCESS_RES)
+            {
+                ErrorHandle(res);
+                _getch();
+                break;
+            }
+
+            PrintRecord(RW_BUSEO, pem, lSize, pbu, buSize, pji, jiSize);
+            break;
+
+        case '8':
+            break;
         
         case '9':
             PrintRecord(RW_JIKGUP, pem, lSize, pbu, buSize, pji, jiSize);

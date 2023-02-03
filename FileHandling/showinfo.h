@@ -14,17 +14,21 @@ void PrintBuseoRecord(BUSEO_CODE* pbu, size_t buSize);
 
 void PrintJikgupRecord(JIKGUP_CODE* pji, size_t jiSize);
 
-short InputRecord(EMPLOYEE* emp, EMPLOYEE* emps=NULL, size_t lSize=0);
+s_res InputRecord(EMPLOYEE* emp, EMPLOYEE* emps=NULL, size_t lSize=0);
 
-short InputBuseo(BUSEO_CODE* code, BUSEO_CODE* pbu=NULL, size_t lSize=0);
+s_res InputBuseo(BUSEO_CODE* code, BUSEO_CODE* pbu=NULL, size_t lSize=0);
 
-short InputJikGup(JIKGUP_CODE* code, JIKGUP_CODE* pji=NULL, size_t lSize=0);
+s_res UpdateBuseo(BUSEO_CODE* pbu, const size_t lSize);
 
-short GetBuseoName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize);
+s_res SearchBuseo(short nCode, BUSEO_CODE* buseo, const size_t lBufSize, const BUSEO_CODE* pbu, const size_t lSize);
 
-short GetJikgupName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize);
+s_res InputJikGup(JIKGUP_CODE* code, JIKGUP_CODE* pji=NULL, size_t lSize=0);
 
-short ExistCode(short code, short nMode, void* pData, size_t lSizeData);
+s_res GetBuseoName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize);
+
+s_res GetJikgupName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize);
+
+s_res ExistCode(short code, short nMode, void* pData, size_t lSizeData);
 
 void ShowMenu();
 

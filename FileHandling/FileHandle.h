@@ -8,21 +8,25 @@
 #include <malloc.h> 
 
 
+#define MAX_NAME    30
+#define MAX_BNAME   20
+#define MAX_JNAME   20
+
 typedef struct {
     short num;      // 사번
-    char name[30];  // 이름
+    char name[MAX_NAME];  // 이름
     short buseo;    // 부서
     short jikgup;   // 직급
 } EMPLOYEE;
 
 typedef struct {
     short code;
-    char buseo_name[20];
+    char buseo_name[MAX_BNAME];
 }BUSEO_CODE;
 
 typedef struct {
     short code;
-    char jikgup_name[20];
+    char jikgup_name[MAX_JNAME];
 }JIKGUP_CODE;
 
 #define SUCCESS_RES         1
@@ -35,6 +39,7 @@ typedef struct {
 #define INVALID_MODE        -3
 #define CANNOT_SEEK         -4
 #define MEM_ALLOC_FAIL      -5
+#define ABORTED_BY_USER     -6
 #define INVALID_PARAM       -500
 
 #define FILE_EXIST          1

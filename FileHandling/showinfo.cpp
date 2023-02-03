@@ -50,6 +50,15 @@ void ShowSubMenu()
     }
 }
 
+void ShowBuseoUpdateMenu()
+{
+    for (int i = 0; i < 50; i++) printf("=");
+
+    printf("\n");
+    printf("업데이트할 부서코드를 입력하고 엔터키를 치세요\n");    
+    printf("업데이트 작업을 취소하시려면 0을 누르고 엔터키를 치세요.\n");
+}
+
 
 void PrintTitle(short mode)
 {
@@ -167,7 +176,7 @@ void PrintRecord(short mode, void* pData, size_t empSize, BUSEO_CODE* pbu, size_
     ShowSubMenu();
 }
 
-short InputRecord(EMPLOYEE* emp, EMPLOYEE *emps, size_t lSize)
+s_res InputRecord(EMPLOYEE* emp, EMPLOYEE *emps, size_t lSize)
 {
     CHK_PARAM(emp);
     
@@ -227,7 +236,7 @@ short InputRecord(EMPLOYEE* emp, EMPLOYEE *emps, size_t lSize)
     return SUCCESS_RES;
 }
 
-short InputBuseo(BUSEO_CODE* code, BUSEO_CODE *pbu, size_t lSize)
+s_res InputBuseo(BUSEO_CODE* code, BUSEO_CODE *pbu, size_t lSize)
 {
     CHK_PARAM(code);
     
@@ -274,7 +283,90 @@ short InputBuseo(BUSEO_CODE* code, BUSEO_CODE *pbu, size_t lSize)
     return SUCCESS_RES;
 }
 
-short InputJikGup(JIKGUP_CODE* code, JIKGUP_CODE *pji, size_t lSize)
+
+s_res SearchBuseo(short nCode, BUSEO_CODE* buseo, const size_t lBufSize, const BUSEO_CODE *pbu, size_t lSize)
+{
+    CHK_2PARAM(pbu, lSize);
+
+    int nCount = lSize / sizeof(BUSEO_CODE);
+    for (int i = 0; i < nCount; i++)
+    {
+        if (pbu[i].code == nCode)
+        {
+            memcpy_s(buseo, lBufSize, &pbu[i], sizeof(lBufSize));
+            return SUCCESS_RES;
+        }
+    }
+
+    return CANNOT_SEEK;
+}
+
+
+s_res UpdateBuseo(BUSEO_CODE* pbu, const size_t lSize)
+{    
+    CHK_2PARAM(pbu, lSize);
+
+    // 부서 코드 입력 변수
+    short nCode = 0;
+
+    // scanf 확인 리턴 변수
+    int nRet = 0;
+
+    // 수정할 부서 정보가 담길 버퍼 와 사이즈
+    BUSEO_CODE bu;
+    size_t buSize = sizeof(BUSEO_CODE);
+
+    // 부서정보의 레코드 갯수 ( rows )
+    int nCount = lSize / sizeof(BUSEO_CODE);
+
+    s_res res = SUCCESS_RES;
+
+
+    do {
+        PrintBuseoRecord(pbu, lSize);
+
+        ShowBuseoUpdateMenu();
+
+        rewind(stdin);
+
+        nRet = scanf_s("%hd", &nCode);
+        if (!nRet)
+            return CANNOT_READ;
+
+        if (nCode == 0)
+            return ABORTED_BY_USER;
+
+        res = SearchBuseo(nCode, &bu, buSize, pbu, lSize);    // 데이터를 찾으면 bu 버퍼에 찾은 데이터를 담아온다
+    } while (res != SUCCESS_RES);       
+
+
+    rewind(stdin);
+
+    //
+    printf("수정할 부서명을 입력해주세요\n");
+    nRet = scanf_s("%s", bu.buseo_name, MAX_BNAME);
+    if (!nRet)
+        return CANNOT_READ;
+
+
+    //
+    for (int i = 0; i < nCount; i++)
+    {
+        if (pbu[i].code == bu.code)
+        {
+            // 같은 코드를 찾아서 부서명을 교체한다.
+            strcpy_s(pbu[i].buseo_name, MAX_BNAME, bu.buseo_name);
+
+            // 다른 정보가 있다면(예를들어 직원 정보라면...) pbu[i].xxx = bu.xxx 이런식으로 처리하면 된다. 
+
+            return SUCCESS_RES;
+        }
+    }
+
+    return CANNOT_SEEK;
+}
+
+s_res InputJikGup(JIKGUP_CODE* code, JIKGUP_CODE *pji, size_t lSize)
 {
     CHK_PARAM(code);
     
@@ -325,7 +417,7 @@ short InputJikGup(JIKGUP_CODE* code, JIKGUP_CODE *pji, size_t lSize)
 }
 
 
-short GetBuseoName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize) {
+s_res GetBuseoName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize) {
     CHK_2PARAM(pData, lSize);
     CHK_2PARAM(name, bufSize);
 
@@ -343,7 +435,7 @@ short GetBuseoName(short nCode, void* pData, size_t lSize, char* name, size_t bu
     return FAIL_RES;
 }
 
-short GetJikgupName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize)
+s_res GetJikgupName(short nCode, void* pData, size_t lSize, char* name, size_t bufSize)
 {
     CHK_2PARAM(pData, lSize);
     CHK_2PARAM(name, bufSize);

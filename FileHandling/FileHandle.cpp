@@ -27,7 +27,15 @@ void ErrorHandle(short errCode)
         break;
 
     case CANNOT_READ:
-        printf("(입력)매체로부터 정보를 읽어올 수 없습니다.");
+        printf("(입력)매체로부터 정보를 읽어올 수 없습니다.\n");
+        break;
+
+    case CANNOT_SEEK:
+        printf("검색에 실패했습니다.\n");
+        break;
+
+    case ABORTED_BY_USER:
+        printf("사용자의 요청으로 작업을 취소했습니다.\n");
         break;
 
     case INVALID_MODE:
@@ -39,11 +47,11 @@ void ErrorHandle(short errCode)
         break;
 
     case INVALID_PARAM:
-        printf("전달된 파라미터(매개변수) 값이 NULL이거나 잘못된 정보입니다.");
+        printf("전달된 파라미터(매개변수) 값이 NULL이거나 잘못된 정보입니다.\n");
         break;
 
     default:
-        printf("에러가 발생했지만 정의되지 않은 에러입니다.");
+        printf("에러가 발생했지만 정의되지 않은 에러입니다.\n");
         break;
     }
 }
