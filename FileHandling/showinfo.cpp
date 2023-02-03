@@ -21,8 +21,8 @@ void ShowMenu()
     printf("============================\n");
     printf("5. 부서 정보 보기\n");
     printf("6. 부서 정보 입력\n");
-    printf("7. 부서 정보 수정(미구현)\n");
-    printf("8. 부서 정보 삭제(미구현)\n");
+    printf("7. 부서 정보 수정\n");
+    printf("8. 부서 정보 삭제\n");
     printf("============================\n");
     printf("9  직급 정보 보기\n");
     printf("0. 직급 정보 입력\n");
@@ -55,8 +55,8 @@ void ShowBuseoUpdateMenu()
     for (int i = 0; i < 50; i++) printf("=");
 
     printf("\n");
-    printf("업데이트할 부서코드를 입력하고 엔터키를 치세요\n");    
-    printf("업데이트 작업을 취소하시려면 0을 누르고 엔터키를 치세요.\n");
+    printf("업데이트 (또는 삭제)할 부서코드를 입력하고 엔터키를 치세요\n");    
+    printf("업데이트 (또는 삭제)작업을 취소하시려면 0을 누르고 엔터키를 치세요.\n");
 }
 
 
@@ -288,7 +288,7 @@ s_res SearchBuseo(short nCode, BUSEO_CODE* buseo, const size_t lBufSize, const B
 {
     CHK_2PARAM(pbu, lSize);
 
-    int nCount = lSize / sizeof(BUSEO_CODE);
+    int nCount = (int)(lSize / sizeof(BUSEO_CODE));
     for (int i = 0; i < nCount; i++)
     {
         if (pbu[i].code == nCode)
@@ -317,7 +317,7 @@ s_res UpdateBuseo(BUSEO_CODE* pbu, const size_t lSize)
     size_t buSize = sizeof(BUSEO_CODE);
 
     // 부서정보의 레코드 갯수 ( rows )
-    int nCount = lSize / sizeof(BUSEO_CODE);
+    int nCount = (int)(lSize / sizeof(BUSEO_CODE));
 
     s_res res = SUCCESS_RES;
 
@@ -364,6 +364,79 @@ s_res UpdateBuseo(BUSEO_CODE* pbu, const size_t lSize)
     }
 
     return CANNOT_SEEK;
+}
+
+
+s_res DeleteBuseo(void** ppData, size_t* lSize)
+{
+    CHK_2PARAM(ppData, lSize);
+
+    // 부서 코드 입력 변수
+    short nCode = 0;
+
+    // scanf 확인 리턴 변수
+    int nRet = 0;
+
+    // 수정할 부서 정보가 담길 버퍼 와 사이즈
+    BUSEO_CODE bu;
+    size_t buSize = sizeof(BUSEO_CODE);
+    memset(&bu, 0, sizeof(BUSEO_CODE));
+
+    // 부서정보의 레코드 갯수 ( rows )
+    int nCount = (int)(*lSize / sizeof(BUSEO_CODE));
+
+    s_res res = SUCCESS_RES;
+
+
+    do {
+        PrintBuseoRecord((BUSEO_CODE *)*ppData, *lSize);
+
+        ShowBuseoUpdateMenu();
+
+        rewind(stdin);
+
+        nRet = scanf_s("%hd", &nCode);
+        if (!nRet)
+            return CANNOT_READ;
+
+        if (nCode == 0)
+            return ABORTED_BY_USER;
+
+        res = SearchBuseo(nCode, &bu, buSize, (BUSEO_CODE*)*ppData, *lSize);    // 데이터를 찾으면 bu 버퍼에 찾은 데이터를 담아온다
+    } while (res != SUCCESS_RES);
+
+
+    rewind(stdin);
+    printf("해당 정보를 정말 삭제하시겠습니까?\ny(삭제) : n(나가기)\n");
+    printf("삭제할 데이터 : %s\n", bu.buseo_name);
+
+    
+    nRet = _getch();
+    if (nRet == 'n' || nRet == 'N')
+        return ABORTED_BY_USER;
+
+    size_t newSize = *lSize - sizeof(BUSEO_CODE);
+    BUSEO_CODE* pNewData = (BUSEO_CODE*)malloc(newSize);
+    if (pNewData == NULL)
+        return MEM_ALLOC_FAIL;
+
+    BUSEO_CODE* pbu = (BUSEO_CODE*)*ppData;
+
+    int p = 0;
+    nCount = (int)(*lSize / sizeof(BUSEO_CODE));
+    for (int i = 0; i < nCount; i++)
+    {
+        if (pbu[i].code != bu.code)
+            memcpy_s(&pNewData[p++], sizeof(BUSEO_CODE), &pbu[i], sizeof(BUSEO_CODE));        
+    }
+
+    free(*ppData);
+    *ppData = NULL;
+
+    *ppData = pNewData;
+    *lSize = newSize;
+
+    return SUCCESS_RES;
 }
 
 s_res InputJikGup(JIKGUP_CODE* code, JIKGUP_CODE *pji, size_t lSize)

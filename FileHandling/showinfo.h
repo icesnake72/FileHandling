@@ -20,6 +20,8 @@ s_res InputBuseo(BUSEO_CODE* code, BUSEO_CODE* pbu=NULL, size_t lSize=0);
 
 s_res UpdateBuseo(BUSEO_CODE* pbu, const size_t lSize);
 
+s_res DeleteBuseo(void** ppData, size_t* lSize);
+
 s_res SearchBuseo(short nCode, BUSEO_CODE* buseo, const size_t lBufSize, const BUSEO_CODE* pbu, const size_t lSize);
 
 s_res InputJikGup(JIKGUP_CODE* code, JIKGUP_CODE* pji=NULL, size_t lSize=0);

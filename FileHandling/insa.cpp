@@ -51,6 +51,25 @@ int main()
         }
     }
 
+    /// < 부서 정보가 없을 경우 실행>    
+    if (ExistFile(BUSEO_FILE) == FILE_NOT_FOUND)
+    {
+        BUSEO_CODE bu;
+        res = InputBuseo(&bu);
+        if (res != SUCCESS_RES)
+        {
+            ErrorHandle(res);
+            return 0;
+        }
+
+        res = WriteToFile(&bu, sizeof(BUSEO_CODE), RW_BUSEO);
+        if (res != SUCCESS_RES)
+        {
+            ErrorHandle(res);
+            return 0;
+        }
+    }
+
 
     //
     // 직원 정보 로딩
@@ -222,6 +241,25 @@ int main()
             break;
 
         case '8':
+            res = DeleteBuseo((void **) & pbu, &buSize);
+            if (res != SUCCESS_RES)
+            {
+                ErrorHandle(res);
+                _getch();
+                break;
+            }
+
+            res = WriteToFile(pbu, buSize, RW_BUSEO);
+            if (res != SUCCESS_RES)
+            {
+                ErrorHandle(res);
+                _getch();
+                break;
+            }
+
+            PrintRecord(RW_BUSEO, pem, lSize, pbu, buSize, pji, jiSize);
+
+
             break;
         
         case '9':
